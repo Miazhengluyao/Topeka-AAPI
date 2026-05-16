@@ -7,55 +7,28 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
-        :root {
-            --mahjong-green: #2D6A4F;
-            --aanhpi-blue: #2CA6D3;
-        }
+        :root { --mahjong-green: #2D6A4F; --aanhpi-blue: #2CA6D3; }
         body { font-family: 'Helvetica Neue', Arial, sans-serif; background-color: #F0F4F5; }
-        
-        /* 顶部 Banner 装饰 */
         .banner-pattern {
             background-color: #2CA6D3;
-            background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 20.5V18H0v-2h20v-2.5L22.5 16 20 18.5v-2.5zM2.5 32l2.5 2.5L2.5 37 0 34.5l2.5-2.5zM7 32l2.5 2.5L7 37 4.5 34.5 7 32zm4.5 0l2.5 2.5L11.5 37 9 34.5l2.5-2.5zM16 32l2.5 2.5L16 37l-2.5-2.5L16 32zm4.5 0l2.5 2.5L20.5 37 18 34.5l2.5-2.5zM25 32l2.5 2.5L25 37l-2.5-2.5L25 32zm4.5 0l2.5 2.5L29.5 37 27 34.5l2.5-2.5zM34 32l2.5 2.5L34 37l-2.5-2.5L34 32zm4.5 0l2.5 2.5L38.5 37 36 34.5l2.5-2.5zM0 0l5 5L0 10V0zm40 0l-5 5 5 5V0z' fill='%23ffffff' fill-opacity='0.1' fill-rule='evenodd'/%3E%3C/svg%3E");
+            background-image: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20 20.5V18H0v-2h20v-2.5L22.5 16 20 18.5v-2.5zM0 0l5 5L0 10V0zm40 0l-5 5 5 5V0z' fill='%23ffffff' fill-opacity='0.1' fill-rule='evenodd'/%3E%3C/svg%3E");
         }
-
-        /* 麻将板块风格 */
         .mahjong-card {
-            background: linear-gradient(rgba(255,255,255,0.9), rgba(255,255,255,0.9)), url('https://www.transparenttextures.com/patterns/felt.png');
+            background: linear-gradient(rgba(255,255,255,0.92), rgba(255,255,255,0.92)), url('https://www.transparenttextures.com/patterns/felt.png');
             border: 4px solid var(--mahjong-green);
-            position: relative;
         }
         .mahjong-tile {
-            display: inline-block;
-            background: white;
-            border-radius: 4px;
-            border-bottom: 4px solid #ddd;
-            padding: 2px 6px;
-            font-weight: bold;
-            color: var(--mahjong-green);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: inline-block; background: white; border-radius: 4px;
+            border-bottom: 4px solid #ddd; padding: 2px 8px; font-weight: bold;
+            color: var(--mahjong-green); box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-
         .hidden-view { display: none !important; }
-        #map { height: 280px; width: 100%; border-radius: 1.5rem; }
-        
-        /* 悬浮球挂件 */
+        #map { height: 280px; width: 100%; border-radius: 1.5rem; z-index: 1; }
         .floating-info {
-            position: fixed;
-            right: 20px;
-            bottom: 80px;
-            width: 50px;
-            height: 50px;
-            background: #FFB703;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            z-index: 40;
-            font-weight: bold;
-            color: white;
-            animation: bounce 2s infinite;
+            position: fixed; right: 20px; bottom: 80px; width: 50px; height: 50px;
+            background: #FFB703; border-radius: 50%; display: flex;
+            align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 40; font-weight: bold; color: white; animation: bounce 2s infinite;
         }
         @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
     </style>
@@ -65,7 +38,7 @@
     <div class="floating-info" onclick="toggleOverlay('info-overlay')">?</div>
 
     <header class="banner-pattern text-white p-8 text-center shadow-lg sticky top-0 z-50">
-        <button id="back-btn" onclick="goHome()" class="hidden-view absolute left-4 top-9 bg-white/20 px-3 py-1 rounded-full text-xs font-bold transition">← BACK</button>
+        <button id="back-btn" onclick="goHome()" class="hidden-view absolute left-4 top-9 bg-white/20 px-3 py-1 rounded-full text-xs font-bold">← BACK</button>
         <h1 class="text-3xl font-black tracking-tighter italic uppercase">Topeka AANHPI</h1>
         <p class="text-[10px] font-bold opacity-80 tracking-widest mt-1">Culture • Community • Connection</p>
     </header>
@@ -73,14 +46,12 @@
     <main class="p-5 max-w-md mx-auto space-y-6">
         
         <div id="home-view" class="space-y-6">
-            
-            <section class="mahjong-card rounded-3xl p-6 shadow-xl text-center overflow-hidden">
-                <div class="absolute top-2 right-4 opacity-20 text-4xl italic font-black">🀄︎</div>
+            <section class="mahjong-card rounded-3xl p-6 shadow-xl text-center relative overflow-hidden">
                 <div class="flex justify-center gap-1 mb-2">
                     <span class="mahjong-tile">发</span><span class="mahjong-tile">中</span><span class="mahjong-tile">白</span>
                 </div>
                 <h2 class="text-3xl font-black text-[#2D6A4F]">MAHJONG!</h2>
-                <p class="text-[11px] font-bold text-slate-500 mt-1 uppercase tracking-tight">Top scorer by June 5th wins a deluxe set!</p>
+                <p class="text-[11px] font-bold text-slate-500 mt-1 uppercase tracking-tight text-balance">Top explorer by June 5th wins a deluxe set!</p>
                 <div class="mt-4 inline-block bg-white/80 px-8 py-3 rounded-2xl border border-emerald-100">
                     <span class="text-[10px] font-bold text-emerald-600 block uppercase tracking-widest">My Points</span>
                     <span id="total-points" class="text-4xl font-black text-emerald-800">0</span>
@@ -88,79 +59,123 @@
             </section>
 
             <div class="grid grid-cols-2 gap-3">
-                <button onclick="toggleOverlay('founder-overlay')" class="bg-white p-3 rounded-2xl shadow-sm text-xs font-bold text-slate-600 border border-slate-100 italic">👋 A Message from Luyao</button>
-                <button onclick="toggleOverlay('prize-overlay')" class="bg-[#FFB703] p-3 rounded-2xl shadow-sm text-xs font-bold text-white uppercase tracking-tighter">🎁 View All Rewards</button>
+                <button onclick="toggleOverlay('founder-overlay')" class="bg-white p-3 rounded-2xl shadow-sm text-xs font-bold text-slate-600 border border-slate-100 italic">👋 From Luyao Zheng</button>
+                <button onclick="toggleOverlay('prize-overlay')" class="bg-[#FFB703] p-3 rounded-2xl shadow-sm text-xs font-bold text-white uppercase tracking-tighter">🎁 Rewards (30 Pts)</button>
             </div>
 
-            <section class="space-y-3 pt-2">
-                <button onclick="openCategory('food')" class="w-full bg-white p-5 rounded-3xl shadow-sm flex items-center gap-4 text-left border-b-4 border-red-500">
+            <section class="space-y-3">
+                <button onclick="openCategory('food')" class="w-full bg-white p-5 rounded-3xl shadow-sm flex items-center gap-4 border-b-4 border-red-500">
                     <span class="text-3xl">🍱</span>
-                    <div><h4 class="font-black text-slate-800">Gourmet Food Map</h4><p class="text-[10px] text-slate-400 font-bold uppercase">Explore Eateries</p></div>
+                    <div class="text-left"><h4 class="font-black text-slate-800">Gourmet Food Map</h4><p class="text-[10px] text-slate-400 font-bold uppercase">13 Locations</p></div>
                 </button>
-                <button onclick="openCategory('art')" class="w-full bg-white p-5 rounded-3xl shadow-sm flex items-center gap-4 text-left border-b-4 border-emerald-500">
+                <button onclick="openCategory('art')" class="w-full bg-white p-5 rounded-3xl shadow-sm flex items-center gap-4 border-b-4 border-emerald-500">
                     <span class="text-3xl">🎨</span>
-                    <div><h4 class="font-black text-slate-800">Culture & Art Map</h4><p class="text-[10px] text-slate-400 font-bold uppercase">Exhibits & Gardens</p></div>
+                    <div class="text-left"><h4 class="font-black text-slate-800">Culture & Art Map</h4><p class="text-[10px] text-slate-400 font-bold uppercase">9 Locations</p></div>
                 </button>
-                <button onclick="openCategory('business')" class="w-full bg-white p-5 rounded-3xl shadow-sm flex items-center gap-4 text-left border-b-4 border-blue-500">
+                <button onclick="openCategory('business')" class="w-full bg-white p-5 rounded-3xl shadow-sm flex items-center gap-4 border-b-4 border-blue-500">
                     <span class="text-3xl">💼</span>
-                    <div><h4 class="font-black text-slate-800">Local Business Map</h4><p class="text-[10px] text-slate-400 font-bold uppercase">Community Shops</p></div>
+                    <div class="text-left"><h4 class="font-black text-slate-800">Local Business Map</h4><p class="text-[10px] text-slate-400 font-bold uppercase">8 Locations</p></div>
                 </button>
             </section>
 
-            <button onclick="generatePoster()" class="w-full bg-slate-800 text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest mt-4">✨ Share My Progress</button>
+            <button onclick="generatePoster()" class="w-full bg-slate-800 text-white py-4 rounded-2xl font-black text-xs uppercase tracking-widest mt-4 shadow-lg">✨ Generate Achievement Poster</button>
         </div>
 
         <div id="map-view" class="hidden-view space-y-4">
             <div id="map"></div>
+            <h2 id="category-title" class="text-xl font-black text-[#2D6A4F] uppercase border-l-4 border-[#FFB703] pl-3 ml-2 italic">Map Details</h2>
             <div id="spots-list" class="space-y-4 pb-12"></div>
         </div>
 
-        <div id="info-overlay" class="fixed inset-0 bg-white z-[100] hidden-view p-8 flex flex-col justify-center overflow-y-auto">
-            <h2 class="text-3xl font-black text-blue-500 mb-4 uppercase">What is AANHPI?</h2>
-            <p class="text-lg leading-relaxed text-slate-700">
-                AANHPI Heritage Month is like a <b>neighborhood potluck</b> that lasts all of May—celebrating the incredible flavors, art, and history of Asian Americans, Native Hawaiians, and Pacific Islanders!
-            </p>
-            <button onclick="toggleOverlay('info-overlay')" class="mt-8 bg-blue-500 text-white px-8 py-3 rounded-full font-bold">Got it!</button>
+        <div id="info-overlay" class="fixed inset-0 bg-white z-[100] hidden-view p-8 flex flex-col justify-center text-center">
+            <h2 class="text-3xl font-black text-blue-500 mb-4">WHAT IS AANHPI?</h2>
+            <p class="text-lg leading-relaxed text-slate-700 italic">"It's like a community-wide celebration that lasts all of May—honoring the incredible flavors, art, and history of Asian Americans & Pacific Islanders!"</p>
+            <button onclick="toggleOverlay('info-overlay')" class="mt-8 bg-blue-500 text-white px-8 py-3 rounded-full font-bold uppercase text-sm">Let's Explore!</button>
         </div>
 
         <div id="founder-overlay" class="fixed inset-0 bg-emerald-50 z-[100] hidden-view p-8 flex flex-col justify-center">
-            <div class="text-4xl mb-4">👋</div>
-            <h2 class="text-2xl font-black text-emerald-800 mb-4 tracking-tighter italic">Hey Friends!</h2>
-            <p class="text-slate-700 leading-relaxed mb-4">
-                I'm <b>Luyao Zheng</b>. I just wanted to do something fun for our community! This challenge is my way of celebrating my roots while helping my mixed-heritage daughter (and all of you!) discover the beautiful Asian and Pacific cultures woven into Topeka. 
-            </p>
-            <p class="text-slate-700 leading-relaxed">Let's explore together!</p>
-            <button onclick="toggleOverlay('founder-overlay')" class="mt-8 bg-emerald-800 text-white px-8 py-3 rounded-full font-bold italic">Let's Play!</button>
+            <h2 class="text-2xl font-black text-emerald-800 mb-4 italic">Hi from Luyao!</h2>
+            <p class="text-slate-700 leading-relaxed mb-4">I created this challenge to celebrate my heritage and show my mixed-heritage daughter the beautiful Asian cultures woven into Topeka. I'm just a community member who wanted to bring us all together through food and art. Enjoy the journey!</p>
+            <button onclick="toggleOverlay('founder-overlay')" class="mt-4 bg-emerald-800 text-white px-8 py-3 rounded-full font-bold text-sm uppercase">Close</button>
         </div>
 
         <div id="prize-overlay" class="fixed inset-0 bg-white z-[100] hidden-view p-8 overflow-y-auto">
-            <h2 class="text-2xl font-black text-slate-800 mb-8 text-center uppercase tracking-widest">Prize Levels</h2>
+            <h2 class="text-2xl font-black text-slate-800 mb-8 text-center uppercase">30-Point Challenge</h2>
             <div class="space-y-8">
-                <div class="flex items-center gap-6">
-                    <span class="text-5xl">🍃</span>
-                    <div><h3 class="font-black text-emerald-700">BRONZE (5+ Points)</h3><p class="text-xs text-slate-500">Leaf-Shaped Pot Holder</p></div>
-                </div>
-                <div class="flex items-center gap-6">
-                    <span class="text-5xl">🧺</span>
-                    <div><h3 class="font-black text-amber-600">SILVER (15+ Points)</h3><p class="text-xs text-slate-500">Woven Bamboo Basket</p></div>
-                </div>
-                <div class="flex items-center gap-6">
-                    <span class="text-5xl">🐘</span>
-                    <div><h3 class="font-black text-blue-600">GOLD (30+ Points)</h3><p class="text-xs text-slate-500">Elephant Sanctuary Scent</p></div>
-                </div>
+                <div class="flex items-center gap-6"><span class="text-5xl">🍃</span><div><h3 class="font-black text-emerald-700">BRONZE (5+ Pts)</h3><p class="text-xs text-slate-500 italic uppercase">Leaf-Shaped Pot Holder</p></div></div>
+                <div class="flex items-center gap-6"><span class="text-5xl">🧺</span><div><h3 class="font-black text-amber-600">SILVER (15+ Pts)</h3><p class="text-xs text-slate-500 italic uppercase">Woven Bamboo Basket</p></div></div>
+                <div class="flex items-center gap-6"><span class="text-5xl">🐘</span><div><h3 class="font-black text-blue-600">GOLD (25+ Pts)</h3><p class="text-xs text-slate-500 italic uppercase">Elephant Sanctuary Scent</p></div></div>
             </div>
-            <button onclick="toggleOverlay('prize-overlay')" class="mt-12 w-full bg-slate-800 text-white py-4 rounded-full font-bold">BACK TO CHALLENGE</button>
+            <button onclick="toggleOverlay('prize-overlay')" class="mt-12 w-full bg-slate-800 text-white py-4 rounded-full font-bold uppercase text-xs">Back</button>
         </div>
 
+        <div id="poster-modal" class="fixed inset-0 bg-black/80 z-[100] hidden-view flex flex-col items-center justify-center p-6 text-center">
+            <div id="poster-area" class="bg-white p-8 rounded-3xl max-w-sm w-full space-y-4 shadow-2xl">
+                <h2 class="text-[#2CA6D3] font-black text-2xl uppercase italic">Topeka AANHPI</h2>
+                <div class="text-5xl">🏆</div>
+                <p class="text-slate-800 font-bold uppercase italic tracking-widest text-sm">I've Checked-in at</p>
+                <p id="poster-count" class="text-7xl font-black text-[#E63946]">0</p>
+                <p class="text-xs text-slate-400 font-bold uppercase">Topeka Cultural Explorer 2026</p>
+            </div>
+            <button onclick="closePoster()" class="mt-8 text-white font-bold underline uppercase text-xs">Close</button>
+        </div>
     </main>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        // Data and Core logic (omitted for brevity, keep previous version logic)
-        // ... (Include spotsData, check-in logic, calculateDistance here)
-        
-        function toggleOverlay(id) {
-            document.getElementById(id).classList.toggle('hidden-view');
+        const DISTANCE_THRESHOLD = 250;
+        const spotsData = [
+            // ART & CULTURE (9)
+            { id: 1, category: "art", name: "Remix Runway (June Sun)", lat: 39.0415, lng: -95.6946, desc: "Highlighting Chinese artist June Sun's garment designs at the library's center." },
+            { id: 2, category: "art", name: "The New Year Pavilion", lat: 39.0588, lng: -95.7142, desc: "A architectural installation at the Discovery Center celebrating lunar festive motifs." },
+            { id: 3, category: "art", name: "Old Prairie Town Asian Garden", lat: 39.0664, lng: -95.6980, desc: "A tranquil garden honoring the heritage of Asian settlers in the Midwest." },
+            { id: 4, category: "art", name: "Kay McFarland Japanese Garden", lat: 39.0601, lng: -95.7176, desc: "A world-class garden in Topeka Zoo featuring authentic koi ponds." },
+            { id: 5, category: "art", name: "Hong Chun Zhang's Exhibit", lat: 39.0345, lng: -95.7020, desc: "At Mulvane Art Museum: Exploring Chinese-American identity through ink drawings." },
+            { id: 6, category: "art", name: "Master Overbey's Martial Arts", lat: 39.0145, lng: -95.6880, desc: "Traditional Asian martial arts school promoting culture and discipline." },
+            { id: 7, category: "art", name: "Essential Henna", lat: 39.0500, lng: -95.6800, desc: "Celebrating the Indian art of intricate henna body painting." },
+            { id: 8, category: "art", name: "Topeka Art Guild & Gallery", lat: 39.0425, lng: -95.7565, desc: "Discover featured artworks from local AANHPI artists." },
+            { id: 9, category: "art", name: "Ted Ensley Gardens", lat: 38.9830, lng: -95.7090, desc: "Explore the lakeside 'Zen' areas with East Asian style bridges and water features." },
+            // FOOD (13)
+            { id: 10, category: "food", name: "Tuptim Thai", lat: 39.0205, lng: -95.7144, desc: "Authentic Thai comfort food in the heart of Topeka." },
+            { id: 11, category: "food", name: "China Pavilion", lat: 39.0195, lng: -95.7005, desc: "Beloved local Cantonese-style restaurant." },
+            { id: 12, category: "food", name: "Golden Dragon", lat: 39.0120, lng: -95.6910, desc: "Long-standing favorite for Chinese culinary classics." },
+            { id: 13, category: "food", name: "Joy Wok", lat: 39.0150, lng: -95.7200, desc: "Expansive buffet and hibachi favorites." },
+            { id: 14, category: "food", name: "Wok & Grill", lat: 39.0380, lng: -95.7610, desc: "Fast and fresh Asian fusion dining." },
+            { id: 15, category: "food", name: "Jong's Thai Kitchen", lat: 39.0480, lng: -95.7320, desc: "Family-run Thai kitchen with soulful recipes." },
+            { id: 16, category: "food", name: "Panda Express", lat: 39.0180, lng: -95.7180, desc: "The iconic American-Chinese quick service classic." },
+            { id: 17, category: "food", name: "Mizu Sushi & Grill", lat: 39.0400, lng: -95.7650, desc: "Fresh sushi and entertaining hibachi grill." },
+            { id: 18, category: "food", name: "Kiku Japanese Steak House", lat: 39.0160, lng: -95.7160, desc: "Vibrant hibachi dining for the whole family." },
+            { id: 19, category: "food", name: "Yuki Restaurant of Japan", lat: 39.0140, lng: -95.7150, desc: "Traditional Japanese dining with fresh ingredients." },
+            { id: 20, category: "food", name: "Oriental Express", lat: 39.0520, lng: -95.6950, desc: "A staple downtown lunch spot for Asian flavors." },
+            { id: 21, category: "food", name: "HuHot Mongolian Grill", lat: 39.0170, lng: -95.7220, desc: "Create your own stir-fry masterpiece." },
+            { id: 22, category: "food", name: "4Guys Bistro (Pho)", lat: 38.9950, lng: -95.7300, desc: "Hearty and authentic Vietnamese Pho bowls." },
+            // BUSINESS (8)
+            { id: 30, category: "business", name: "Coffeehead", lat: 39.0300, lng: -95.6800, desc: "AANHPI-owned coffee hub for the community." },
+            { id: 31, category: "business", name: "Asian Market Topeka", lat: 39.0435, lng: -95.7312, desc: "The heart of Asian groceries and cultural ingredients." },
+            { id: 32, category: "business", name: "Amazing Lash", lat: 39.0400, lng: -95.7500, desc: "Local beauty services with AANHPI entrepreneurial spirit." },
+            { id: 33, category: "business", name: "Topeka Cat Cafe", lat: 39.0500, lng: -95.6900, desc: "Coffee and community rescue cats." },
+            { id: 34, category: "business", name: "Cafe Barnabas", lat: 39.0200, lng: -95.7100, desc: "Specialty drinks and community-driven cafe." },
+            { id: 35, category: "business", name: "Health & Wellness Massage", lat: 39.0320, lng: -95.7100, desc: "Therapeutic massage following traditional wellness." },
+            { id: 36, category: "business", name: "Chi Reflexology", lat: 39.0150, lng: -95.7120, desc: "Ancient reflexology for modern balance." },
+            { id: 37, category: "business", name: "INFINITY Nails Spa", lat: 39.0130, lng: -95.7230, desc: "Quality nail care in a relaxing salon environment." }
+        ];
+
+        let spots = JSON.parse(localStorage.getItem('aanhpi_v30_final')) || spotsData;
+        let map, markersGroup, currentCat;
+
+        function updateGlobalStats() {
+            document.getElementById('total-points').innerText = spots.filter(s => s.checkedIn).length;
+        }
+
+        function toggleOverlay(id) { document.getElementById(id).classList.toggle('hidden-view'); }
+
+        function openCategory(cat) {
+            currentCat = cat;
+            document.getElementById('home-view').classList.add('hidden-view');
+            document.getElementById('map-view').classList.remove('hidden-view');
+            document.getElementById('back-btn').classList.remove('hidden-view');
+            if (!map) initMap();
+            setTimeout(() => { map.invalidateSize(); renderList(); }, 100);
         }
 
         function goHome() {
@@ -170,7 +185,55 @@
             updateGlobalStats();
         }
 
-        // ... Add standard render functions from previous turn
+        function initMap() {
+            map = L.map('map').setView([39.0473, -95.6752], 12);
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png').addTo(map);
+            markersGroup = L.layerGroup().addTo(map);
+        }
+
+        function renderList() {
+            const list = document.getElementById('spots-list');
+            list.innerHTML = ''; markersGroup.clearLayers();
+            const filtered = spots.filter(s => s.category === currentCat);
+            const bounds = [];
+            filtered.forEach(s => {
+                L.marker([s.lat, s.lng]).addTo(markersGroup).bindPopup(`<b>${s.name}</b>`);
+                bounds.push([s.lat, s.lng]);
+                const card = document.createElement('div');
+                card.className = `p-5 rounded-3xl border-2 transition ${s.checkedIn ? 'bg-emerald-50 border-emerald-200' : 'bg-white border-transparent shadow-sm'}`;
+                card.innerHTML = `<h3 class="font-black italic ${s.checkedIn ? 'line-through text-slate-400' : ''}">${s.name}</h3><p class="text-xs text-slate-400 mt-1">${s.desc}</p>
+                    <button onclick="checkIn(${s.id})" class="w-full mt-4 py-3 rounded-xl text-xs font-black uppercase tracking-widest ${s.checkedIn ? 'bg-emerald-500 text-white' : 'bg-red-600 text-white'}">
+                    ${s.checkedIn ? 'Completed ✓' : 'Verify & Check-in'}</button>`;
+                list.appendChild(card);
+            });
+            if (bounds.length > 0) map.fitBounds(bounds, { padding: [40, 40] });
+        }
+
+        function checkIn(id) {
+            navigator.geolocation.getCurrentPosition(pos => {
+                const s = spots.find(x => x.id === id);
+                const d = calcDist(pos.coords.latitude, pos.coords.longitude, s.lat, s.lng);
+                if(d <= DISTANCE_THRESHOLD) {
+                    spots = spots.map(x => x.id === id ? {...x, checkedIn: true} : x);
+                    localStorage.setItem('aanhpi_v30_final', JSON.stringify(spots));
+                    renderList();
+                } else alert(`Too far! You're ${Math.round(d)}m away. Move within ${DISTANCE_THRESHOLD}m.`);
+            }, () => alert("GPS Error. Check permissions."));
+        }
+
+        function calcDist(la1, lo1, la2, lo2) {
+            const R = 6371e3; const p1 = la1*Math.PI/180, p2 = la2*Math.PI/180;
+            const dp = (la2-la1)*Math.PI/180, dl = (lo2-lo1)*Math.PI/180;
+            const a = Math.sin(dp/2)**2 + Math.cos(p1)*Math.cos(p2)*Math.sin(dl/2)**2;
+            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        }
+
+        function generatePoster() {
+            document.getElementById('poster-count').innerText = spots.filter(s => s.checkedIn).length;
+            toggleOverlay('poster-modal');
+        }
+        function closePoster() { toggleOverlay('poster-modal'); }
+        window.onload = updateGlobalStats;
     </script>
 </body>
 </html>
