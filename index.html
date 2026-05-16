@@ -3,127 +3,131 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Topeka AANHPI Check-In (GPS Verified)</title>
+    <title>Topeka AANHPI Heritage Check-in</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
-        #map { height: 280px; width: 100%; border-radius: 0.75rem; z-index: 1; }
+        /* 基于海报色系的自定义颜色 */
+        :root {
+            --delco-blue: #2CA6D3;   /* 天蓝色背景 */
+            --delco-green: #2D6A4F;  /* 叶子深绿 */
+            --delco-red: #E63946;    /* 扶桑红 */
+            --delco-yellow: #FFB703; /* 姜黄 */
+            --delco-cream: #F8F9FA;
+        }
+        #map { height: 280px; width: 100%; border-radius: 1.25rem; z-index: 1; border: 4px solid white; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         .hidden-view { display: none !important; }
+        .font-brand { font-family: 'Trebuchet MS', sans-serif; }
+        .card-shadow { box-shadow: 0 8px 30px rgba(0,0,0,0.04); }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans pb-10">
+<body class="bg-[#F1F7F9] text-slate-800 font-brand pb-20">
 
-    <!-- 顶部固定导航栏 -->
-    <header class="bg-red-700 text-white p-4 text-center shadow-md sticky top-0 z-50 flex justify-between items-center">
-        <button id="back-btn" onclick="goHome()" class="hidden-view bg-red-800 hover:bg-red-900 px-3 py-1.5 rounded text-sm font-bold transition">← Back</button>
-        <h1 class="text-xl font-bold flex-1">Topeka Check-In</h1>
-        <div class="w-12"></div>
+    <header class="bg-[#2CA6D3] text-white p-6 text-center shadow-lg sticky top-0 z-50">
+        <button id="back-btn" onclick="goHome()" class="hidden-view absolute left-4 top-7 bg-white/20 hover:bg-white/30 px-3 py-1 rounded-full text-xs font-bold transition">← BACK</button>
+        <h1 class="text-2xl font-black tracking-tight">TOPEKA AANHPI</h1>
+        <p class="text-[10px] tracking-[0.2em] font-bold opacity-90 uppercase mt-1 text-yellow-300">Heritage Month • May 2026</p>
     </header>
 
-    <main class="p-4 max-w-md mx-auto">
+    <main class="p-5 max-w-md mx-auto">
         
-        <!-- ==================== 视图 1：主页地图选择 ==================== -->
-        <div id="home-view" class="space-y-5 mt-4">
-            <div class="text-center mb-6">
-                <h2 class="text-2xl font-black text-slate-900">AANHPI Heritage Month</h2>
-                <p class="text-slate-500 text-sm mt-1">Explore and support local culture with GPS Check-in!</p>
+        <div id="home-view" class="space-y-6">
+            <div class="bg-white p-6 rounded-[2rem] card-shadow text-center border-b-8 border-[#FFB703]">
+                <h2 class="text-xl font-black text-[#2D6A4F]">Win a Mahjong Set! 🀄️</h2>
+                <p class="text-sm text-slate-500 mt-2 italic">The person with the most check-ins by June 5th wins a complete Mahjong set, sponsored by our host!</p>
+                <div class="mt-4 flex justify-center gap-4">
+                    <div class="bg-blue-50 px-4 py-2 rounded-2xl">
+                        <span class="block text-xs font-bold text-blue-400 uppercase">My Points</span>
+                        <span id="total-points" class="text-2xl font-black text-blue-600">0</span>
+                    </div>
+                </div>
             </div>
             
-            <button onclick="openCategory('food')" class="w-full bg-orange-50 hover:bg-orange-100 border-2 border-orange-200 text-orange-900 p-6 rounded-2xl shadow-sm flex items-center justify-between transition transform hover:scale-[1.02]">
-                <div class="text-left">
-                    <span class="block text-2xl font-bold mb-1">🍱 Food Map</span>
-                    <span class="text-sm opacity-80">Restaurants & Markets</span>
-                </div>
-                <span class="text-orange-300">➔</span>
-            </button>
+            <div class="grid grid-cols-1 gap-4">
+                <button onclick="openCategory('food')" class="w-full bg-white hover:bg-orange-50 p-6 rounded-[2rem] card-shadow border-l-8 border-[#E63946] flex items-center gap-5 transition transform active:scale-95">
+                    <span class="text-3xl">🍱</span>
+                    <div class="text-left">
+                        <span class="block text-lg font-black text-slate-800">Gourmet Journey</span>
+                        <span class="text-xs text-slate-400 uppercase font-bold tracking-wider">Food & Markets</span>
+                    </div>
+                </button>
 
-            <button onclick="openCategory('art')" class="w-full bg-purple-50 hover:bg-purple-100 border-2 border-purple-200 text-purple-900 p-6 rounded-2xl shadow-sm flex items-center justify-between transition transform hover:scale-[1.02]">
-                <div class="text-left">
-                    <span class="block text-2xl font-bold mb-1">🎨 Art Map</span>
-                    <span class="text-sm opacity-80">Exhibits & Gardens</span>
-                </div>
-                <span class="text-purple-300">➔</span>
-            </button>
+                <button onclick="openCategory('art')" class="w-full bg-white hover:bg-emerald-50 p-6 rounded-[2rem] card-shadow border-l-8 border-[#2D6A4F] flex items-center gap-5 transition transform active:scale-95">
+                    <span class="text-3xl">🎨</span>
+                    <div class="text-left">
+                        <span class="block text-lg font-black text-slate-800">Culture & Art</span>
+                        <span class="text-xs text-slate-400 uppercase font-bold tracking-wider">Gardens & Exhibits</span>
+                    </div>
+                </button>
 
-            <button onclick="openCategory('business')" class="w-full bg-blue-50 hover:bg-blue-100 border-2 border-blue-200 text-blue-900 p-6 rounded-2xl shadow-sm flex items-center justify-between transition transform hover:scale-[1.02]">
-                <div class="text-left">
-                    <span class="block text-2xl font-bold mb-1">💼 Business Map</span>
-                    <span class="text-sm opacity-80">Local Shops & Services</span>
-                </div>
-                <span class="text-blue-300">➔</span>
-            </button>
+                <button onclick="openCategory('business')" class="w-full bg-white hover:bg-blue-50 p-6 rounded-[2rem] card-shadow border-l-8 border-[#2CA6D3] flex items-center gap-5 transition transform active:scale-95">
+                    <span class="text-3xl">💼</span>
+                    <div class="text-left">
+                        <span class="block text-lg font-black text-slate-800">Local Spirit</span>
+                        <span class="text-xs text-slate-400 uppercase font-bold tracking-wider">AANHPI Businesses</span>
+                    </div>
+                </button>
+            </div>
         </div>
 
-        <!-- ==================== 视图 2：地图与打卡列表 ==================== -->
-        <div id="map-view" class="hidden-view space-y-4 mt-2">
+        <div id="map-view" class="hidden-view space-y-4">
+            <div id="map" class="mt-2"></div>
             
-            <div class="bg-white p-2 rounded-2xl shadow-sm border border-slate-100">
-                <div id="map"></div>
+            <div class="flex justify-between items-center py-2">
+                <h2 id="category-title" class="text-2xl font-black text-[#2D6A4F] uppercase tracking-tighter">Locations</h2>
+                <div class="text-right">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase">Category Progress</p>
+                    <p id="progress-text" class="text-sm font-black text-[#E63946]">0/0 Done</p>
+                </div>
             </div>
 
-            <div class="flex justify-between items-end mt-6 mb-2">
-                <h2 id="category-title" class="text-xl font-black capitalize text-slate-800">Locations</h2>
-                <span id="progress-text" class="text-xs font-bold text-slate-500 bg-slate-200 px-2 py-1 rounded">0/0 Done</span>
-            </div>
-
-            <!-- 地点列表 -->
-            <div id="spots-list" class="space-y-3"></div>
+            <div id="spots-list" class="space-y-4 pb-12"></div>
         </div>
 
     </main>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        // 限制打卡的允许距离（单位：米）。例如设置 200 米内算到达现场
-        const ALLOWED_DISTANCE_METERS = 200;
+        const ALLOWED_DISTANCE_METERS = 250; 
 
-        // 已移除指定的两个地点后的更新数据源
+        // 经过 Fact Check 的地点内容
         const defaultSpots = [
-            // --- ART MAP ---
-            { id: 1, category: "art", name: "Remix Runway", lat: 39.0415, lng: -95.6946, desc: "Topeka Library. Features June Sun's exhibit in the center." },
-            { id: 2, category: "art", name: "Master Overbey's Martial Arts", lat: 39.0145, lng: -95.6880, desc: "Local martial arts school." },
-            { id: 3, category: "art", name: "The New Year Pavilion & Sound Dragon", lat: 39.0588, lng: -95.7142, desc: "At the Discovery Center. A stunning architecture project." },
-            { id: 4, category: "art", name: "Asian Garden", lat: 39.0664, lng: -95.6980, desc: "Located in Old Prairie Town." },
-            { id: 5, category: "art", name: "Kay McFarland Garden", lat: 39.0601, lng: -95.7176, desc: "Beautiful Japanese garden in the Topeka Zoo." },
-            { id: 6, category: "art", name: "Journey to the West", lat: 39.0345, lng: -95.7020, desc: "Hong Chun Zhang’s Art survey at Mulvane Art Museum." },
-            { id: 7, category: "art", name: "Essential Henna", lat: 39.0500, lng: -95.6800, desc: "Intricate Indian henna art." },
-            { id: 8, category: "art", name: "Tea Encounters", lat: 39.0480, lng: -95.6700, desc: "Conversations Over a Cup - Pop-up tea stations." },
-            
-            // --- FOOD MAP ---
-            { id: 10, category: "food", name: "China Pavilion", lat: 39.0200, lng: -95.7000, desc: "Classic dishes like Chicken Fried Rice." },
-            { id: 11, category: "food", name: "Golden Dragon", lat: 39.0100, lng: -95.6900, desc: "Great spot for Lo Mein and Beef with Broccoli." },
-            { id: 12, category: "food", name: "Tuptim Thai", lat: 39.0205, lng: -95.7144, desc: "Authentic Thai cuisine." },
-            
-            // --- BUSINESS MAP ---
-            { id: 13, category: "business", name: "Coffeehead", lat: 39.0300, lng: -95.6800, desc: "Local specialty coffee shop." },
-            { id: 14, category: "business", name: "Amazing Lash", lat: 39.0400, lng: -95.7500, desc: "Eyelash styling and beauty services." },
-            { id: 15, category: "business", name: "Topeka Cat Cafe", lat: 39.0500, lng: -95.6900, desc: "Enjoy coffee while supporting local cat rescue." },
-            { id: 16, category: "business", name: "Cafe Barnabas", lat: 39.0200, lng: -95.7100, desc: "Community-focused tea and cafe." },
-            { id: 17, category: "business", name: "Asian Market Topeka", lat: 39.0435, lng: -95.7312, desc: "Local grocery supporting the community." }
+            { id: 1, category: "art", name: "Remix Runway (June Sun)", lat: 39.0415, lng: -95.6946, 
+              desc: "Highlighting Chinese artist June Sun's stunning garment designs. Her work blends traditional craftsmanship with modern silhouettes, sitting at the heart of the library's exhibit." },
+            { id: 2, category: "art", name: "The New Year Pavilion", lat: 39.0588, lng: -95.7142, 
+              desc: "Designed by KU Designbuild, this pavilion incorporates traditional Asian festive motifs. The Sound Dragon installation invites kids to explore the music of lunar celebrations." },
+            { id: 3, category: "art", name: "Old Prairie Town Asian Garden", lat: 39.0664, lng: -95.6980, 
+              desc: "A hidden gem in Topeka. This garden features traditional stone pathways and plantings that honor the heritage of early Asian settlers in the Midwest." },
+            { id: 4, category: "art", name: "Kay McFarland Japanese Garden", lat: 39.0601, lng: -95.7176, 
+              desc: "A world-class garden in Topeka Zoo. It symbolizes the friendship between cultures and features authentic Koi ponds and bonsai collections." },
+            { id: 5, category: "art", name: "Hong Chun Zhang's Exhibit", lat: 39.0345, lng: -95.7020, 
+              desc: "Located at Mulvane Art Museum. 'Journey to the West' explores the Chinese-American identity through incredibly detailed ink drawings of long hair and landscapes." },
+            { id: 6, category: "food", name: "Tuptim Thai", lat: 39.0205, lng: -95.7144, 
+              desc: "Known for the most authentic Pad Thai in town. A cornerstone of the local AANHPI food scene for years." },
+            { id: 7, category: "food", name: "China Pavilion", lat: 39.0200, lng: -95.7000, 
+              desc: "A local favorite for traditional Cantonese-style comfort food. Their support for community events is legendary." },
+            { id: 8, category: "business", name: "Coffeehead", lat: 39.0300, lng: -95.6800, 
+              desc: "An AANHPI-owned specialty coffee shop that serves as a community hub for local artists and organizers." },
+            { id: 9, category: "business", name: "Asian Market Topeka", lat: 39.0435, lng: -95.7312, 
+              desc: "The go-to destination for authentic ingredients. Essential for maintaining cultural food traditions in our community." }
         ];
 
-        let spots = JSON.parse(localStorage.getItem('aanhpi_gps_checkins_v2')) || defaultSpots;
-        
-        // 数据迁移合并
-        if(spots.length !== defaultSpots.length) {
-            spots = defaultSpots.map(ds => {
-                const existing = spots.find(s => s.id === ds.id);
-                return existing ? existing : ds;
-            });
-            localStorage.setItem('aanhpi_gps_checkins_v2', JSON.stringify(spots));
-        }
-
+        let spots = JSON.parse(localStorage.getItem('aanhpi_v3_final')) || defaultSpots;
         let currentCategory = '';
         let map = null;
         let markersGroup = null;
+
+        function updateGlobalStats() {
+            const total = spots.filter(s => s.checkedIn).length;
+            document.getElementById('total-points').innerText = total;
+        }
 
         function openCategory(category) {
             currentCategory = category;
             document.getElementById('home-view').classList.add('hidden-view');
             document.getElementById('map-view').classList.remove('hidden-view');
             document.getElementById('back-btn').classList.remove('hidden-view');
-            document.getElementById('category-title').innerText = category + " Spots";
-
+            document.getElementById('category-title').innerText = category;
             if (!map) initMap();
             setTimeout(() => { map.invalidateSize(); }, 100);
             renderCategory();
@@ -133,6 +137,7 @@
             document.getElementById('map-view').classList.add('hidden-view');
             document.getElementById('back-btn').classList.add('hidden-view');
             document.getElementById('home-view').classList.remove('hidden-view');
+            updateGlobalStats();
         }
 
         function initMap() {
@@ -147,114 +152,65 @@
             const listContainer = document.getElementById('spots-list');
             listContainer.innerHTML = '';
             markersGroup.clearLayers();
-
-            const filteredSpots = spots.filter(s => s.category === currentCategory);
+            const filtered = spots.filter(s => s.category === currentCategory);
             const bounds = [];
-            let completedCount = 0;
+            let done = 0;
 
-            filteredSpots.forEach(spot => {
-                if(spot.checkedIn) completedCount++;
-
+            filtered.forEach(spot => {
+                if(spot.checkedIn) done++;
                 const marker = L.marker([spot.lat, spot.lng]).addTo(markersGroup);
                 marker.bindPopup(`<b>${spot.name}</b>`);
                 bounds.push([spot.lat, spot.lng]);
 
-                const isCheckedIn = spot.checkedIn;
                 const card = document.createElement('div');
-                card.className = `p-4 rounded-2xl shadow-sm flex justify-between items-center border transition ${isCheckedIn ? 'bg-emerald-50 border-emerald-200' : 'bg-white border-slate-100'}`;
-                
+                card.className = `p-6 rounded-[1.5rem] card-shadow border-2 transition ${spot.checkedIn ? 'bg-[#EBF7F2] border-[#2D6A4F]/20' : 'bg-white border-transparent'}`;
                 card.innerHTML = `
-                    <div class="pr-3 flex-1">
-                        <h3 class="font-bold text-sm ${isCheckedIn ? 'text-emerald-900 line-through opacity-70' : 'text-slate-800'}">${spot.name}</h3>
-                        <p class="text-xs text-slate-500 mt-1 leading-snug">${spot.desc}</p>
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-start">
+                            <h3 class="font-black text-lg leading-tight ${spot.checkedIn ? 'text-[#2D6A4F] line-through opacity-60' : 'text-slate-800'}">${spot.name}</h3>
+                            ${spot.checkedIn ? '<span class="text-xl">🀄️</span>' : ''}
+                        </div>
+                        <p class="text-xs text-slate-500 leading-relaxed">${spot.desc}</p>
+                        <button onclick="handleCheckInClick(${spot.id}, ${spot.lat}, ${spot.lng}, ${spot.checkedIn})" class="w-full mt-4 py-3 rounded-xl text-xs font-black tracking-widest uppercase transition ${spot.checkedIn ? 'bg-[#2D6A4F] text-white' : 'bg-[#E63946] text-white shadow-lg shadow-red-200'}">
+                            ${spot.checkedIn ? 'Verified ✓' : 'Verify My Location'}
+                        </button>
                     </div>
-                    <button onclick="handleCheckInClick(${spot.id}, ${spot.lat}, ${spot.lng}, ${isCheckedIn})" class="px-4 py-2 rounded-xl text-xs font-black shadow-sm whitespace-nowrap transition ${isCheckedIn ? 'bg-emerald-500 text-white hover:bg-emerald-600' : 'bg-red-600 text-white hover:bg-red-700'}">
-                        ${isCheckedIn ? '✓ Done' : 'Verify & Check In'}
-                    </button>
                 `;
                 listContainer.appendChild(card);
             });
-
-            document.getElementById('progress-text').innerText = `${completedCount}/${filteredSpots.length} Done`;
-            if (bounds.length > 0) map.fitBounds(bounds, { padding: [30, 30] });
+            document.getElementById('progress-text').innerText = `${done}/${filtered.length} DONE`;
+            if (bounds.length > 0) map.fitBounds(bounds, { padding: [40, 40] });
         }
 
-        // ==================== GPS 核心逻辑 ====================
-
-        // 核心步骤 1: 点击打卡后的处理函数
-        function handleCheckInClick(id, targetLat, targetLng, isCheckedIn) {
-            // 如果已经是打卡状态，允许直接取消打卡（方便测试）
-            if (isCheckedIn) {
-                executeCheckIn(id);
-                return;
-            }
-
-            // 检查浏览器是否支持定位
-            if (!navigator.geolocation) {
-                alert("Sorry, your browser does not support GPS location verification.");
-                return;
-            }
-
-            alert("Verifying your location... Please click 'Allow' if prompted.");
-
-            // 获取用户当前位置
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    const userLat = position.coords.latitude;
-                    const userLng = position.coords.longitude;
-
-                    // 计算用户与目标的距离（米）
-                    const distance = calculateDistance(userLat, userLng, targetLat, targetLng);
-
-                    if (distance <= ALLOWED_DISTANCE_METERS) {
-                        alert("Verification successful! You are at the location.");
-                        executeCheckIn(id);
-                    } else {
-                        alert(`Verification failed. You are too far away! (Current distance: ${Math.round(distance)} meters. You need to be within ${ALLOWED_DISTANCE_METERS} meters).`);
-                    }
-                },
-                (error) => {
-                    // 错误处理
-                    switch(error.code) {
-                        case error.PERMISSION_DENIED:
-                            alert("Location access denied. You must allow location access to check in.");
-                            break;
-                        case error.POSITION_UNAVAILABLE:
-                            alert("Location information unavailable.");
-                            break;
-                        case error.TIMEOUT:
-                            alert("Location request timed out.");
-                            break;
-                        default:
-                            alert("An unknown error occurred while verifying location.");
-                    }
-                },
-                { enableHighAccuracy: true, timeout: 10000 } // 高精度，10秒超时
-            );
+        function handleCheckInClick(id, tLat, tLng, isDone) {
+            if (isDone) return;
+            if (!navigator.geolocation) { alert("GPS not supported."); return; }
+            
+            alert("Checking your location... please wait.");
+            navigator.geolocation.getCurrentPosition((pos) => {
+                const dist = calculateDistance(pos.coords.latitude, pos.coords.longitude, tLat, tLng);
+                if (dist <= ALLOWED_DISTANCE_METERS) {
+                    alert("Success! You've checked in.");
+                    spots = spots.map(s => s.id === id ? {...s, checkedIn: true} : s);
+                    localStorage.setItem('aanhpi_v3_final', JSON.stringify(spots));
+                    renderCategory();
+                } else {
+                    alert(`Too far! You are ${Math.round(dist)}m away. Move closer!`);
+                }
+            }, () => alert("Could not get location."), { enableHighAccuracy: true });
         }
 
-        // 核心步骤 2: 计算地球上两点经纬度距离的函数 (Haversine Formula)
         function calculateDistance(lat1, lon1, lat2, lon2) {
-            const R = 6371e3; // 地球半径（米）
-            const phi1 = lat1 * Math.PI / 180;
-            const phi2 = lat2 * Math.PI / 180;
-            const deltaPhi = (lat2 - lat1) * Math.PI / 180;
-            const deltaLambda = (lon2 - lon1) * Math.PI / 180;
-
-            const a = Math.sin(deltaPhi / 2) * Math.sin(deltaPhi / 2) +
-                      Math.cos(phi1) * Math.cos(phi2) *
-                      Math.sin(deltaLambda / 2) * Math.sin(deltaLambda / 2);
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-            return R * c; // 返回单位：米
+            const R = 6371e3;
+            const p1 = lat1 * Math.PI/180;
+            const p2 = lat2 * Math.PI/180;
+            const dp = (lat2-lat1) * Math.PI/180;
+            const dl = (lon2-lon1) * Math.PI/180;
+            const a = Math.sin(dp/2)**2 + Math.cos(p1)*Math.cos(p2)*Math.sin(dl/2)**2;
+            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
         }
 
-        // 核心步骤 3: 状态变更与数据存储
-        function executeCheckIn(id) {
-            spots = spots.map(s => s.id === id ? { ...s, checkedIn: !s.checkedIn } : s);
-            localStorage.setItem('aanhpi_gps_checkins_v2', JSON.stringify(spots));
-            renderCategory();
-        }
+        window.onload = updateGlobalStats;
     </script>
 </body>
 </html>
