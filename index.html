@@ -3,214 +3,147 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Topeka AANHPI Heritage Check-in</title>
+    <title>Topeka AANHPI 打卡地图</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
-        /* 基于海报色系的自定义颜色 */
         :root {
-            --delco-blue: #2CA6D3;   /* 天蓝色背景 */
-            --delco-green: #2D6A4F;  /* 叶子深绿 */
-            --delco-red: #E63946;    /* 扶桑红 */
-            --delco-yellow: #FFB703; /* 姜黄 */
-            --delco-cream: #F8F9FA;
+            --delco-blue: #2CA6D3;
+            --delco-green: #2D6A4F;
+            --delco-red: #E63946;
+            --delco-yellow: #FFB703;
         }
-        #map { height: 280px; width: 100%; border-radius: 1.25rem; z-index: 1; border: 4px solid white; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        body { font-family: 'STHeiti', 'Microsoft YaHei', sans-serif; }
+        #map { height: 280px; width: 100%; border-radius: 1.5rem; z-index: 1; border: 4px solid white; }
         .hidden-view { display: none !important; }
-        .font-brand { font-family: 'Trebuchet MS', sans-serif; }
-        .card-shadow { box-shadow: 0 8px 30px rgba(0,0,0,0.04); }
+        .map-card { position: relative; overflow: hidden; transition: all 0.3s ease; }
+        .map-card::after { content: "START MAP ➔"; position: absolute; bottom: 10px; right: 20px; font-size: 10px; font-weight: bold; opacity: 0.6; }
+        /* 模拟生成海报的样式 */
+        #poster-canvas { background: linear-gradient(135deg, #2CA6D3, #2D6A4F); color: white; padding: 40px; border-radius: 20px; display: none; }
     </style>
 </head>
-<body class="bg-[#F1F7F9] text-slate-800 font-brand pb-20">
+<body class="bg-[#F8FBFC] text-slate-800 pb-20">
 
     <header class="bg-[#2CA6D3] text-white p-6 text-center shadow-lg sticky top-0 z-50">
-        <button id="back-btn" onclick="goHome()" class="hidden-view absolute left-4 top-7 bg-white/20 hover:bg-white/30 px-3 py-1 rounded-full text-xs font-bold transition">← BACK</button>
-        <h1 class="text-2xl font-black tracking-tight">TOPEKA AANHPI</h1>
-        <p class="text-[10px] tracking-[0.2em] font-bold opacity-90 uppercase mt-1 text-yellow-300">Heritage Month • May 2026</p>
+        <button id="back-btn" onclick="goHome()" class="hidden-view absolute left-4 top-7 bg-white/20 px-3 py-1 rounded-full text-xs font-bold transition">← 返回</button>
+        <h1 class="text-2xl font-black tracking-tight leading-none">TOPEKA AANHPI</h1>
+        <p class="text-[11px] font-bold opacity-90 uppercase mt-1 tracking-widest">亚裔传统月打卡挑战</p>
     </header>
 
-    <main class="p-5 max-w-md mx-auto">
+    <main class="p-5 max-w-md mx-auto space-y-8">
         
-        <div id="home-view" class="space-y-6">
-            <div class="bg-white p-6 rounded-[2rem] card-shadow text-center border-b-8 border-[#FFB703]">
-                <h2 class="text-xl font-black text-[#2D6A4F]">Win a Mahjong Set! 🀄️</h2>
-                <p class="text-sm text-slate-500 mt-2 italic">The person with the most check-ins by June 5th wins a complete Mahjong set, sponsored by our host!</p>
-                <div class="mt-4 flex justify-center gap-4">
-                    <div class="bg-blue-50 px-4 py-2 rounded-2xl">
-                        <span class="block text-xs font-bold text-blue-400 uppercase">My Points</span>
-                        <span id="total-points" class="text-2xl font-black text-blue-600">0</span>
+        <div id="home-view" class="space-y-8">
+            
+            <section class="bg-white rounded-[2rem] p-6 shadow-xl border-b-8 border-[#FFB703] relative overflow-hidden text-center">
+                <div class="absolute -top-2 -right-2 bg-[#E63946] text-white px-4 py-1 rotate-12 font-black text-sm shadow-md">GRAND PRIZE</div>
+                <h2 class="text-2xl font-black text-slate-800">打卡赢麻将 🀄️</h2>
+                <p class="text-xs text-slate-500 mt-2 leading-relaxed">截至6月5日打卡最多的人，<br>将获得由发起人赞助的高级麻将一副！</p>
+                <div class="mt-4 inline-block bg-blue-50 px-6 py-3 rounded-2xl border-2 border-blue-100">
+                    <span class="text-xs font-bold text-blue-400 block uppercase mb-1">已打卡地点 My Points</span>
+                    <span id="total-points" class="text-4xl font-black text-[#2CA6D3]">0</span>
+                </div>
+            </section>
+
+            <section class="space-y-4">
+                <h3 class="text-sm font-black text-slate-400 uppercase tracking-widest pl-2">选择你的地图 / Select Map</h3>
+                
+                <button onclick="openCategory('food')" class="map-card w-full bg-white border-2 border-[#E63946]/20 p-5 rounded-3xl shadow-sm flex items-center gap-4 text-left">
+                    <div class="bg-red-50 w-14 h-14 rounded-2xl flex items-center justify-center text-3xl shadow-inner">🍱</div>
+                    <div>
+                        <h4 class="text-lg font-black text-slate-800">亚裔美食地图</h4>
+                        <p class="text-[11px] text-slate-400 font-bold uppercase tracking-tighter">AANHPI Gourmet Food Map</p>
+                    </div>
+                </button>
+
+                <button onclick="openCategory('art')" class="map-card w-full bg-white border-2 border-[#2D6A4F]/20 p-5 rounded-3xl shadow-sm flex items-center gap-4 text-left">
+                    <div class="bg-emerald-50 w-14 h-14 rounded-2xl flex items-center justify-center text-3xl shadow-inner">🎨</div>
+                    <div>
+                        <h4 class="text-lg font-black text-slate-800">亚裔艺术文化地图</h4>
+                        <p class="text-[11px] text-slate-400 font-bold uppercase tracking-tighter">AANHPI Art & Culture Map</p>
+                    </div>
+                </button>
+
+                <button onclick="openCategory('business')" class="map-card w-full bg-white border-2 border-[#2CA6D3]/20 p-5 rounded-3xl shadow-sm flex items-center gap-4 text-left">
+                    <div class="bg-blue-50 w-14 h-14 rounded-2xl flex items-center justify-center text-3xl shadow-inner">💼</div>
+                    <div>
+                        <h4 class="text-lg font-black text-slate-800">亚裔商业地图</h4>
+                        <p class="text-[11px] text-slate-400 font-bold uppercase tracking-tighter">AANHPI Business Map</p>
+                    </div>
+                </button>
+            </section>
+
+            <section class="bg-white rounded-[2rem] p-6 shadow-sm border border-slate-100">
+                <h3 class="text-center font-black text-slate-800 mb-6 underline decoration-[#FFB703] decoration-4 underline-offset-4">等级与奖品 / Levels</h3>
+                <div class="grid grid-cols-3 gap-3 text-center">
+                    <div>
+                        <img src="https://di2ponv0v5otw.cloudfront.net/posts/2026/05/15/69ffce26bedd34cb54882d6f/m_69ffce2d6e352f758f8447fc.jpg" class="w-full aspect-square object-cover rounded-xl border border-slate-100 mb-2">
+                        <p class="text-[10px] font-black leading-tight text-emerald-700">Bronze (5+)<br>Leaf Pot Holder</p>
+                    </div>
+                    <div>
+                        <img src="https://di2ponv0v5otw.cloudfront.net/posts/2026/05/15/69f12374d7555d8d8ad24a60/m_69f1237a6e352fa10741872a.jpg" class="w-full aspect-square object-cover rounded-xl border border-slate-100 mb-2">
+                        <p class="text-[10px] font-black leading-tight text-amber-700">Silver (15+)<br>Woven Bamboo</p>
+                    </div>
+                    <div>
+                        <img src="https://di2ponv0v5otw.cloudfront.net/posts/2026/05/15/69f125e4dbd8f0487db7e8f5/m_69f125ec6e352f559286438f.jpg" class="w-full aspect-square object-cover rounded-xl border border-slate-100 mb-2">
+                        <p class="text-[10px] font-black leading-tight text-blue-700">Gold (30+)<br>Elephant Scent</p>
                     </div>
                 </div>
-            </div>
-            
-            <div class="grid grid-cols-1 gap-4">
-                <button onclick="openCategory('food')" class="w-full bg-white hover:bg-orange-50 p-6 rounded-[2rem] card-shadow border-l-8 border-[#E63946] flex items-center gap-5 transition transform active:scale-95">
-                    <span class="text-3xl">🍱</span>
-                    <div class="text-left">
-                        <span class="block text-lg font-black text-slate-800">Gourmet Journey</span>
-                        <span class="text-xs text-slate-400 uppercase font-bold tracking-wider">Food & Markets</span>
-                    </div>
-                </button>
+            </section>
 
-                <button onclick="openCategory('art')" class="w-full bg-white hover:bg-emerald-50 p-6 rounded-[2rem] card-shadow border-l-8 border-[#2D6A4F] flex items-center gap-5 transition transform active:scale-95">
-                    <span class="text-3xl">🎨</span>
-                    <div class="text-left">
-                        <span class="block text-lg font-black text-slate-800">Culture & Art</span>
-                        <span class="text-xs text-slate-400 uppercase font-bold tracking-wider">Gardens & Exhibits</span>
-                    </div>
-                </button>
-
-                <button onclick="openCategory('business')" class="w-full bg-white hover:bg-blue-50 p-6 rounded-[2rem] card-shadow border-l-8 border-[#2CA6D3] flex items-center gap-5 transition transform active:scale-95">
-                    <span class="text-3xl">💼</span>
-                    <div class="text-left">
-                        <span class="block text-lg font-black text-slate-800">Local Spirit</span>
-                        <span class="text-xs text-slate-400 uppercase font-bold tracking-wider">AANHPI Businesses</span>
-                    </div>
+            <div class="pt-4">
+                <button onclick="generatePoster()" class="w-full bg-[#2D6A4F] text-white py-4 rounded-2xl font-black shadow-lg shadow-emerald-100 flex items-center justify-center gap-2">
+                    ✨ 生成成就海报 / Generate Poster
                 </button>
             </div>
         </div>
 
         <div id="map-view" class="hidden-view space-y-4">
-            <div id="map" class="mt-2"></div>
-            
-            <div class="flex justify-between items-center py-2">
-                <h2 id="category-title" class="text-2xl font-black text-[#2D6A4F] uppercase tracking-tighter">Locations</h2>
-                <div class="text-right">
-                    <p class="text-[10px] font-bold text-slate-400 uppercase">Category Progress</p>
-                    <p id="progress-text" class="text-sm font-black text-[#E63946]">0/0 Done</p>
+            <div id="map"></div>
+            <h2 id="category-title" class="text-xl font-black text-[#2D6A4F] uppercase border-l-4 border-[#FFB703] pl-3 ml-2">地图详情</h2>
+            <div id="spots-list" class="space-y-4 pb-12"></div>
+        </div>
+
+        <div id="poster-modal" class="fixed inset-0 bg-black/80 z-[100] hidden-view flex flex-col items-center justify-center p-6 text-center">
+            <div id="poster-area" class="bg-white p-8 rounded-3xl max-w-sm w-full space-y-4">
+                <h2 class="text-[#2CA6D3] font-black text-2xl uppercase italic">Topeka AANHPI</h2>
+                <div class="text-4xl">🏆</div>
+                <p class="text-slate-800 font-bold">我已在托皮卡成功打卡</p>
+                <p id="poster-count" class="text-6xl font-black text-[#E63946]">0</p>
+                <p class="text-xs text-slate-400">Join the challenge and win Mahjong!</p>
+                <div class="flex justify-center gap-4 pt-4 border-t">
+                    <button onclick="share('fb')" class="text-blue-600 font-bold">FB</button>
+                    <button onclick="share('ig')" class="text-pink-600 font-bold">IG</button>
+                    <button onclick="share('sc')" class="text-yellow-500 font-bold">Snap</button>
                 </div>
             </div>
-
-            <div id="spots-list" class="space-y-4 pb-12"></div>
+            <button onclick="closePoster()" class="mt-8 text-white font-bold underline">关闭 / Close</button>
         </div>
 
     </main>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        const ALLOWED_DISTANCE_METERS = 250; 
-
-        // 经过 Fact Check 的地点内容
-        const defaultSpots = [
-            { id: 1, category: "art", name: "Remix Runway (June Sun)", lat: 39.0415, lng: -95.6946, 
-              desc: "Highlighting Chinese artist June Sun's stunning garment designs. Her work blends traditional craftsmanship with modern silhouettes, sitting at the heart of the library's exhibit." },
-            { id: 2, category: "art", name: "The New Year Pavilion", lat: 39.0588, lng: -95.7142, 
-              desc: "Designed by KU Designbuild, this pavilion incorporates traditional Asian festive motifs. The Sound Dragon installation invites kids to explore the music of lunar celebrations." },
-            { id: 3, category: "art", name: "Old Prairie Town Asian Garden", lat: 39.0664, lng: -95.6980, 
-              desc: "A hidden gem in Topeka. This garden features traditional stone pathways and plantings that honor the heritage of early Asian settlers in the Midwest." },
-            { id: 4, category: "art", name: "Kay McFarland Japanese Garden", lat: 39.0601, lng: -95.7176, 
-              desc: "A world-class garden in Topeka Zoo. It symbolizes the friendship between cultures and features authentic Koi ponds and bonsai collections." },
-            { id: 5, category: "art", name: "Hong Chun Zhang's Exhibit", lat: 39.0345, lng: -95.7020, 
-              desc: "Located at Mulvane Art Museum. 'Journey to the West' explores the Chinese-American identity through incredibly detailed ink drawings of long hair and landscapes." },
-            { id: 6, category: "food", name: "Tuptim Thai", lat: 39.0205, lng: -95.7144, 
-              desc: "Known for the most authentic Pad Thai in town. A cornerstone of the local AANHPI food scene for years." },
-            { id: 7, category: "food", name: "China Pavilion", lat: 39.0200, lng: -95.7000, 
-              desc: "A local favorite for traditional Cantonese-style comfort food. Their support for community events is legendary." },
-            { id: 8, category: "business", name: "Coffeehead", lat: 39.0300, lng: -95.6800, 
-              desc: "An AANHPI-owned specialty coffee shop that serves as a community hub for local artists and organizers." },
-            { id: 9, category: "business", name: "Asian Market Topeka", lat: 39.0435, lng: -95.7312, 
-              desc: "The go-to destination for authentic ingredients. Essential for maintaining cultural food traditions in our community." }
+        // 核心数据 (保持不变)
+        const spotsData = [
+            { id: 1, category: "art", name: "Remix Runway (June Sun)", lat: 39.0415, lng: -95.6946, desc: "由中国艺术家June Sun设计的精美时装展，位于图书馆中心位。" },
+            { id: 2, category: "art", name: "The New Year Pavilion", lat: 39.0588, lng: -95.7142, desc: "位于Discovery Center，融合了亚洲节庆元素的建筑装置。" },
+            { id: 3, category: "art", name: "Asian Garden", lat: 39.0664, lng: -95.6980, desc: "Old Prairie Town内的亚裔花园。" },
+            { id: 4, category: "art", name: "Kay McFarland Garden", lat: 39.0601, lng: -95.7176, desc: "托皮卡动物园内的顶级日式园林。" },
+            { id: 5, category: "art", name: "Hong Chun Zhang's Exhibit", lat: 39.0345, lng: -95.7020, desc: "Mulvane艺术博物馆：张宏图的工笔墨绘展。" },
+            { id: 6, category: "food", name: "Tuptim Thai", lat: 39.0205, lng: -95.7144, desc: "托皮卡必吃的泰国料理，社区亚裔美食代表。" },
+            { id: 7, category: "food", name: "China Pavilion", lat: 39.0200, lng: -95.7000, desc: "经典的粤式风味，支持社区多年的老字号。" },
+            { id: 8, category: "business", name: "Coffeehead", lat: 39.0300, lng: -95.6800, desc: "亚裔经营的精品咖啡店。" },
+            { id: 9, category: "business", name: "Asian Market Topeka", lat: 39.0435, lng: -95.7312, desc: "托皮卡亚裔生活的灵魂基地。" }
         ];
 
-        let spots = JSON.parse(localStorage.getItem('aanhpi_v3_final')) || defaultSpots;
-        let currentCategory = '';
-        let map = null;
-        let markersGroup = null;
+        let spots = JSON.parse(localStorage.getItem('aanhpi_final_v4')) || spotsData;
+        let map, markersGroup;
 
         function updateGlobalStats() {
-            const total = spots.filter(s => s.checkedIn).length;
-            document.getElementById('total-points').innerText = total;
+            document.getElementById('total-points').innerText = spots.filter(s => s.checkedIn).length;
         }
 
-        function openCategory(category) {
-            currentCategory = category;
+        function openCategory(cat) {
             document.getElementById('home-view').classList.add('hidden-view');
             document.getElementById('map-view').classList.remove('hidden-view');
-            document.getElementById('back-btn').classList.remove('hidden-view');
-            document.getElementById('category-title').innerText = category;
-            if (!map) initMap();
-            setTimeout(() => { map.invalidateSize(); }, 100);
-            renderCategory();
-        }
-
-        function goHome() {
-            document.getElementById('map-view').classList.add('hidden-view');
-            document.getElementById('back-btn').classList.add('hidden-view');
-            document.getElementById('home-view').classList.remove('hidden-view');
-            updateGlobalStats();
-        }
-
-        function initMap() {
-            map = L.map('map').setView([39.0473, -95.6752], 12);
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-                attribution: '&copy; OpenStreetMap'
-            }).addTo(map);
-            markersGroup = L.layerGroup().addTo(map);
-        }
-
-        function renderCategory() {
-            const listContainer = document.getElementById('spots-list');
-            listContainer.innerHTML = '';
-            markersGroup.clearLayers();
-            const filtered = spots.filter(s => s.category === currentCategory);
-            const bounds = [];
-            let done = 0;
-
-            filtered.forEach(spot => {
-                if(spot.checkedIn) done++;
-                const marker = L.marker([spot.lat, spot.lng]).addTo(markersGroup);
-                marker.bindPopup(`<b>${spot.name}</b>`);
-                bounds.push([spot.lat, spot.lng]);
-
-                const card = document.createElement('div');
-                card.className = `p-6 rounded-[1.5rem] card-shadow border-2 transition ${spot.checkedIn ? 'bg-[#EBF7F2] border-[#2D6A4F]/20' : 'bg-white border-transparent'}`;
-                card.innerHTML = `
-                    <div class="space-y-2">
-                        <div class="flex justify-between items-start">
-                            <h3 class="font-black text-lg leading-tight ${spot.checkedIn ? 'text-[#2D6A4F] line-through opacity-60' : 'text-slate-800'}">${spot.name}</h3>
-                            ${spot.checkedIn ? '<span class="text-xl">🀄️</span>' : ''}
-                        </div>
-                        <p class="text-xs text-slate-500 leading-relaxed">${spot.desc}</p>
-                        <button onclick="handleCheckInClick(${spot.id}, ${spot.lat}, ${spot.lng}, ${spot.checkedIn})" class="w-full mt-4 py-3 rounded-xl text-xs font-black tracking-widest uppercase transition ${spot.checkedIn ? 'bg-[#2D6A4F] text-white' : 'bg-[#E63946] text-white shadow-lg shadow-red-200'}">
-                            ${spot.checkedIn ? 'Verified ✓' : 'Verify My Location'}
-                        </button>
-                    </div>
-                `;
-                listContainer.appendChild(card);
-            });
-            document.getElementById('progress-text').innerText = `${done}/${filtered.length} DONE`;
-            if (bounds.length > 0) map.fitBounds(bounds, { padding: [40, 40] });
-        }
-
-        function handleCheckInClick(id, tLat, tLng, isDone) {
-            if (isDone) return;
-            if (!navigator.geolocation) { alert("GPS not supported."); return; }
-            
-            alert("Checking your location... please wait.");
-            navigator.geolocation.getCurrentPosition((pos) => {
-                const dist = calculateDistance(pos.coords.latitude, pos.coords.longitude, tLat, tLng);
-                if (dist <= ALLOWED_DISTANCE_METERS) {
-                    alert("Success! You've checked in.");
-                    spots = spots.map(s => s.id === id ? {...s, checkedIn: true} : s);
-                    localStorage.setItem('aanhpi_v3_final', JSON.stringify(spots));
-                    renderCategory();
-                } else {
-                    alert(`Too far! You are ${Math.round(dist)}m away. Move closer!`);
-                }
-            }, () => alert("Could not get location."), { enableHighAccuracy: true });
-        }
-
-        function calculateDistance(lat1, lon1, lat2, lon2) {
-            const R = 6371e3;
-            const p1 = lat1 * Math.PI/180;
-            const p2 = lat2 * Math.PI/180;
-            const dp = (lat2-lat1) * Math.PI/180;
-            const dl = (lon2-lon1) * Math.PI/180;
-            const a = Math.sin(dp/2)**2 + Math.cos(p1)*Math.cos(p2)*Math.sin(dl/2)**2;
-            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-        }
-
-        window.onload = updateGlobalStats;
-    </script>
-</body>
-</html>
+            document.getElementById('back-btn').classList.
